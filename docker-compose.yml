@@ -1,0 +1,74 @@
+version: '3.0'
+
+networks:
+    test_net:
+    product_net:
+
+services:
+    api:
+        image: golang:latest
+        container_name: football-manager-api
+        environment:
+            - DB_DSN="root:root@tcp(football-manager-db)/footballmanager?charset=utf8&parseTime=True&loc=Local"
+            - API_HOSTNAME="0.0.0.0:8081"
+            - API_LOG_FILE:"/var/log/footballmanagerapi/footballmanagerapi.log"
+        volumes:
+            - ${API_DIR}:${CONTAINER_API_DIR}
+        working_dir: ${CONTAINER_API_DIR}
+        depends_on:
+            - football-manager-db
+        networks:
+            test_net:
+        ports:
+            - 8081:8081
+        expose:
+            - 8081
+        command: go run api.go # go build -o ${CONTAINER_API_DIR}/bin/api api.go
+
+    football-manager-db:
+        image: mariadb:latest
+        container_name: football-manager-db
+        restart: always
+        volumes:
+            - ./tests/data/:/docker-entrypoint-initdb.d/
+        environment:
+            - MYSQL_ALLOW_EMPTY_PASSWORD=NO
+            - MYSQL_DATABASE=footballmanager
+            - MYSQL_ROOT_PASSWORD=root
+        networks:
+            product_net:
+        ports:
+            - 8088:3306
+        expose:
+            - 3306
+
+    football-manager-api-test:
+        image: golang:latest
+        container_name: football-manager-api-test
+        environment:
+            - DB_DSN="root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local"
+            - API_LOG_FILE:"/var/log/footballmanagerapi/footballmanagerapi.log"
+        volumes:
+            - ${API_DIR}:${CONTAINER_API_DIR}
+        working_dir: ${CONTAINER_API_DIR}
+        depends_on:
+            - football-manager-db-test
+        networks:
+            test_net:
+
+    football-manager-db-test:
+        image: mariadb:latest
+        container_name: football-manager-db-test
+        restart: always
+        volumes:
+            - ./tests/data/:/docker-entrypoint-initdb.d/
+        environment:
+            - MYSQL_ALLOW_EMPTY_PASSWORD=NO
+            - MYSQL_DATABASE=footballmanager_test
+            - MYSQL_ROOT_PASSWORD=root
+        networks:
+            test_net:
+        ports:
+            - 3306:3306
+        expose:
+            - 3306
