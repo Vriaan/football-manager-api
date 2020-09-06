@@ -25,7 +25,7 @@ func TestLogin(t *testing.T) {
 		},
 	}
 	responseStatus, responseBody, err := tests.TestHTTPHandler("POST", loginRoute,
-		params, GetFootballer)
+		params, Login)
 	if err != nil {
 		t.Fatal(err)
 	}

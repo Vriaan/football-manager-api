@@ -36,7 +36,7 @@ type CustomClaims struct {
 // 	return err
 // }
 
-// createAuthToken generates an authorization token
+// CreateAuthToken generates an authorization token
 func CreateAuthToken(userID uint) (authToken string, err error) {
 	expirationTime := time.Now().Add(authenticationDuration)
 
@@ -57,8 +57,8 @@ func Authorization(c *gin.Context) {
 	authorizationHeader := c.GetHeader(AuthorizationHeader)
 	authToken := strings.Replace(authorizationHeader, AuthorizationHeaderType+" ", "", 1)
 
-	claims := CustomClaims{}
-	token, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
+	claims := &CustomClaims{}
+	token, err := jwt.ParseWithClaims(authToken, claims, func(tkn *jwt.Token) (interface{}, error) {
 		return jwtSecretKey, nil
 	})
 
@@ -66,6 +66,7 @@ func Authorization(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": http.StatusText(http.StatusUnauthorized),
 		})
-		// return
+		return
 	}
+	c.Next()
 }

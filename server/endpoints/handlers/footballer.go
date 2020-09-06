@@ -31,12 +31,53 @@ func RegisterNewFootballer(c *gin.Context) {
 
 // DeleteFootballer removes footballer from database (no soft delete here)
 func DeleteFootballer(c *gin.Context) {
+	footballerID, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
 
+	deletedFootballer := &models.Footballer{}
+	err = models.GetDB().Delete(&deletedFootballer, footballerID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }
 
 // UpdateFootballer updates footballer saved informations
 func UpdateFootballer(c *gin.Context) {
+	footballerID, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
 
+	var footballerFieldToUpdate models.Footballer
+	if err = c.ShouldBindJSON(&footballerFieldToUpdate); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// footballerFieldToUpdate.ID = 0
+	var updatedFootballer models.Footballer
+	updatedFootballer, err = (&models.Footballer{}).UpdateOne(uint(footballerID), footballerFieldToUpdate)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedFootballer)
 }
 
 // ListFootballers returns footballers matching provided criterias

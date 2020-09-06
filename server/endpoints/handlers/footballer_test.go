@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-
+	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 
 	"github/vriaan/footballmanagerapi/models"
@@ -115,6 +116,67 @@ func TestRegisterNewFootballer(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, responseStatus, string(responseBody))
 	assert.Equal(t, bodyParams["FirstName"], newFootballer.FirstName)
 	assert.Equal(t, bodyParams["LastName"], newFootballer.LastName)
+}
+
+func TestDeleteFootballer(t *testing.T) {
+	var err error
+	newFootballerToDeleteAfter := models.Footballer{FirstName: "Test", LastName: "Delete"}
+	if err = models.GetDB().Create(&newFootballerToDeleteAfter).Error; err != nil {
+		t.Fatal(err)
+	}
+	toDeleteFootballerID := strconv.FormatUint(uint64(newFootballerToDeleteAfter.ID), 10)
+	deleteFootballerPath := "/footballers/" + toDeleteFootballerID
+	params := tests.TestParams{
+		PathParams: gin.Params{
+			gin.Param{Key: "id", Value: toDeleteFootballerID},
+		},
+	}
+	responseStatus, responseBody, err := tests.TestHTTPHandler("DELETE", deleteFootballerPath, params, DeleteFootballer)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusNoContent, responseStatus, string(responseBody))
+	assert.Equal(t, "", string(responseBody))
+
+	err = models.GetDB().First(&models.Footballer{}, toDeleteFootballerID).Error
+	assert.Error(t, gorm.ErrRecordNotFound, err)
+}
+
+func TestUpdateFootballer(t *testing.T) {
+	var err error
+	newFootballerToUpdateAfter := models.Footballer{FirstName: "Test", LastName: "ToUpdate"}
+	if err = models.GetDB().Create(&newFootballerToUpdateAfter).Error; err != nil {
+		t.Fatal(err)
+	}
+	toUpdateFootballerID := strconv.FormatUint(uint64(newFootballerToUpdateAfter.ID), 10)
+	updateFootballerPath := "/footballers/" + toUpdateFootballerID
+	params := tests.TestParams{
+		PathParams: gin.Params{
+			gin.Param{Key: "id", Value: toUpdateFootballerID},
+		},
+		QueryParams: gin.Params{
+			gin.Param{Key: "LastName", Value: "Updated"},
+		},
+	}
+	responseStatus, responseBody, err := tests.TestHTTPHandler("PUT", updateFootballerPath, params, UpdateFootballer)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updatedFootballer := models.Footballer{}
+	err = models.GetDB().First(&updatedFootballer, toUpdateFootballerID).Error
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusOK, responseStatus, string(responseBody))
+	assert.Equal(t, "Updated", updatedFootballer.LastName)
+	var expectedResponse []byte
+	if expectedResponse, err = json.Marshal(&updatedFootballer); err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, string(expectedResponse), string(responseBody))
 }
 
 func BenchmarkGetFootballer(b *testing.B) {

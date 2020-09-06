@@ -30,13 +30,4 @@ func TestRegister(t *testing.T) {
 	Register(engine)
 	engineRouteRegistered := engine.Routes()
 	assert.Len(t, engineRouteRegistered, len(endpoints))
-	// for index, route := range engineRouteRegistered {
-	// 	sameRouteRegistered := endpoints[index].Method == route.Method &&
-	// 		endpoints[index].Path == route.Path &&
-	// 		endpoints[index].Handler != route.Handler &&
-	// 		route.HandlerFunc != nil
-	//
-	// 	assert.True(t, sameRouteRegistered)
-	// }
-
 }

@@ -18,6 +18,7 @@ import (
 	"github/vriaan/footballmanagerapi/models"
 )
 
+// TODO Replace by a mock SQL
 var dbHandler *gorm.DB
 
 // TestParams is a convenient structure to pass parameters for tests endpoint

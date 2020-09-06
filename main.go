@@ -18,8 +18,10 @@ const (
 	databaseDsnEnvVar = "DB_DSN"
 	// Environnement variable name containg API's config log
 	apiLogFileEnvVar = "API_LOG_FILE"
-	// Whether the API is is debug mode or release mod (debug mod will print errors reasons whereas production will print a genric reason)
+	// Environnement variable name for whether the API is is debug mode or release mod (debug mod will print errors reasons whereas production will print a genric reason)
 	apiMode = "API_MODE"
+	// Environnement variable name for authorization tokens to be encrypted/decrypted
+	apiAuthorizationSecretKey = "AUTH_SECRET"
 	// Message for missing environnement variable
 	missingEnvVar = "Missing environnement variable `%s`"
 	// Database type (must be one of gorm supported database see https://gorm.io/docs/connecting_to_the_database.html).
@@ -53,6 +55,7 @@ func main() {
 		err           error
 	)
 
+	// TODO: Implement config argument fallback on environment variables ?
 	envSettings := getEnvironnementSettings()
 	if dbConnHandler, err = gorm.Open(sqlDatabase, envSettings[databaseDsnEnvVar]); err != nil {
 		panic("Initialize Database connection pool handler:" + err.Error())

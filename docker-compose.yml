@@ -16,6 +16,7 @@ services:
             - 'API_HOSTNAME=0.0.0.0:8081'
             - 'API_LOG_FILE=/var/log/footballmanagerapi/footballmanagerapi.log'
             - 'API_MODE=debug'
+            - 'AUTH_SECRET=thisissecret'
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
         working_dir: ${CONTAINER_API_DIR}
@@ -52,6 +53,7 @@ services:
         environment:
             - 'DB_DSN=root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local'
             - 'API_LOG_FILE=var/log/footballmanagerapi/footballmanagerapi.log'
+            - 'AUTH_SECRET=thisissecret'
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
         working_dir: ${CONTAINER_API_DIR}

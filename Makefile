@@ -51,10 +51,6 @@ benchmark:
 build:
 	go build -o $(API_EXECUTABLE_NAME) $(API_MAIN_FILE)
 
-start_api:
-	go build -o $(API_EXECUTABLE_NAME) $(API_MAIN_FILE)
-	$(API_EXECUTABLE_NAME)&
-
 # Clean golang cache & containers
 clean:
 	go clean -cache -testcache

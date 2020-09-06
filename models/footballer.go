@@ -25,3 +25,12 @@ func (f *Footballer) Count() (count int, err error) {
 	err = GetDB().Model(f).Where(f).Count(&count).Error
 	return
 }
+
+// UpdateOne updates the footballer informations matching the record ID provided
+func (f *Footballer) UpdateOne(footballerID uint, fieldToUpdate Footballer) (footballer Footballer, err error) {
+	if err = GetDB().Model(f).Where("id = ?", footballerID).Updates(fieldToUpdate).Error; err != nil {
+		return
+	}
+	err = GetDB().First(&footballer, footballerID).Error
+	return
+}
