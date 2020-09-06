@@ -10,56 +10,60 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	// Initialize MySQL driver for tests
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/pkg/errors"
 
 	"github/vriaan/footballmanagerapi/models"
-	"github/vriaan/footballmanagerapi/server/endpoints"
 )
 
-// Creates some singleton used later for the tests
-func init() {
-	GetDbConnection()
-	GetAPIEngine()
+var dbHandler *gorm.DB
+
+// TestParams is a convenient structure to pass parameters for tests endpoint
+type TestParams struct {
+	PathParams  gin.Params
+	QueryParams gin.Params
+	BodyParams  map[string]interface{}
 }
 
-var (
-	testAPI   *gin.Engine
-	dbHandler *gorm.DB
-)
+// TestHTTPHandler wraps logic to test http handler response (a bit too complicated for just testing .... (wait for gin to make it easy))
+func TestHTTPHandler(
+	method, urlEndpoint string,
+	params TestParams,
+	apiHandler gin.HandlerFunc,
+) (responseStatus int, responseBody []byte, err error) {
+	GetDBConnection()
+	recorder := httptest.NewRecorder()
+	handler := func(writer http.ResponseWriter, request *http.Request) {
 
-// GetAPIEngine provides a test api engine within a singleton
-func GetAPIEngine() *gin.Engine {
-	if testAPI != nil {
-		return testAPI
-	}
-	_, testAPI = gin.CreateTestContext(httptest.NewRecorder())
-	err := endpoints.Register(testAPI)
-	if err != nil {
-		panic(err)
-	}
-
-	return testAPI
-}
-
-// GetDbConnection instanciates a database connection for test within a singleton (TODO: Use a SQL Mock ?)
-func GetDbConnection() *gorm.DB {
-	if dbHandler != nil {
-		return dbHandler
+		gin.SetMode(gin.TestMode)
+		context, _ := gin.CreateTestContext(writer)
+		context.Request = request
+		context.Params = append(params.PathParams, params.QueryParams...)
+		apiHandler(context)
 	}
 
-	var err error
-	dbHandler, err = gorm.Open(
-		"mysql",
-		"root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local",
-	)
-	if err != nil {
-		panic(err)
+	// Need to rework the parameters for request data to be Marshalled as JSON
+	requestData := make(map[string]interface{}, 0)
+	for _, param := range params.QueryParams {
+		requestData[param.Key] = param.Value
 	}
-	models.SetDb(dbHandler)
+	for key, value := range params.BodyParams {
+		requestData[key] = value
+	}
+	var data io.Reader
+	if data, err = dataToBufferizedJSON(requestData); err != nil {
+		return
+	}
 
-	return dbHandler
+	request := httptest.NewRequest(method, urlEndpoint, data)
+	request.Header.Add("Content-Type", "application/json")
+
+	handler(recorder, request)
+	result := recorder.Result()
+	responseStatus = result.StatusCode
+	responseBody, err = ioutil.ReadAll(result.Body)
+	return
 }
 
 // DataToBufferizedJSON handles data transformation to JSON and bufferize it
@@ -82,25 +86,21 @@ func dataToBufferizedJSON(data interface{}) (dataBuffized io.Reader, err error) 
 	return
 }
 
-// DoJSONRequest creates and performs a JSON request to the API router
-func DoJSONRequest(method, url string, parameters interface{}) (responseStatus int, responseBody []byte, err error) {
-	var (
-		request *http.Request
-		data    io.Reader
+// GetDBConnection instanciates a database connection for test within a singleton (TODO: Use a SQL Mock ?)
+func GetDBConnection() *gorm.DB {
+	if dbHandler != nil {
+		return dbHandler
+	}
+
+	var err error
+	dbHandler, err = gorm.Open(
+		"mysql",
+		"root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local",
 	)
-
-	if data, err = dataToBufferizedJSON(parameters); err != nil {
-		return
+	if err != nil {
+		panic(err)
 	}
-	if request, err = http.NewRequest(method, url, data); err != nil {
-		return
-	}
-	request.Header.Add("Content-Type", "application/json")
-	recorder := httptest.NewRecorder()
-	testAPI.ServeHTTP(recorder, request)
-	result := recorder.Result()
+	models.SetDb(dbHandler)
 
-	responseStatus = result.StatusCode
-	responseBody, err = ioutil.ReadAll(result.Body)
-	return
+	return dbHandler
 }

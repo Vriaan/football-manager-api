@@ -11,25 +11,27 @@ API_EXECUTABLE_NAME := $(CONTAINER_API_DIR)/bin/api
 # api entrypoint file
 API_MAIN_FILE := $(CONTAINER_API_DIR)/main.go
 
-test_docker:
+run_docker_test:
 	@echo "RUNNING Tests within Docker container $(DOCKER_API_TEST_SERVICE)\n"
 	-docker-compose run --rm -w $(CONTAINER_API_DIR) $(DOCKER_API_TEST_SERVICE) make test
 	docker-compose rm -fs
 
-benchmark_docker:
+run_docker_benchmark:
 	@echo "RUNNING Benchmarks within Docker container $(DOCKER_API_TEST_SERVICE)\n"
 	-docker-compose run --rm -w $(CONTAINER_API_DIR) $(DOCKER_API_TEST_SERVICE) make benchmark
 	docker-compose rm -fs
 
-start_api_docker:
+start_docker_api:
 	@echo "STARTING API within docker container $(DOCKER_API_TEST_SERVICE)\n"
-	docker-compose up --force-recreate  -d $(DOCKER_API_SERVICE)
+	docker-compose up -d --force-recreate $(DOCKER_API_SERVICE)
 
 test:
+	sleep 2
 	go clean -cache -testcache
 	go test -cover ./...
 
 benchmark:
+	sleep 2
 	go clean -cache -testcache
 	go test  ./... -run=XXX -bench=.
 

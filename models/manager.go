@@ -7,6 +7,7 @@ import (
 // Manager represents model for table managers
 type Manager struct {
 	gorm.Model
-	Name  string `json:"name"`
-	Level uint64 `json:"level"`
+	FirstName string
+	LastName  uint64
+	Password  string
 }

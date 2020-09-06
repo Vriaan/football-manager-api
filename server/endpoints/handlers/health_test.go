@@ -1,4 +1,4 @@
-package handlers_test
+package handlers
 
 import (
 	"testing"
@@ -9,7 +9,8 @@ import (
 )
 
 func TestPingRoute(t *testing.T) {
-	responseStatus, responseBody, err := tests.DoJSONRequest("GET", "/ping", nil)
+	urlPing := "/ping"
+	responseStatus, responseBody, err := tests.TestHTTPHandler("GET", urlPing, tests.TestParams{}, Ping)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,11 +21,10 @@ func TestPingRoute(t *testing.T) {
 
 func BenchmarkPing(b *testing.B) {
 	b.ReportAllocs()
-
 	urlPing := "/ping"
 
 	for n := 0; n < b.N; n++ {
-		_, _, err := tests.DoJSONRequest("GET", urlPing, nil)
+		_, _, err := tests.TestHTTPHandler("GET", urlPing, tests.TestParams{}, Ping)
 		if err != nil {
 			b.Fatal(err)
 		}

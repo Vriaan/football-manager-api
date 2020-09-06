@@ -21,7 +21,7 @@ func RegisterNewFootballer(c *gin.Context) {
 		return
 	}
 
-	if err = models.GetDb().Create(&newFootballer).Error; err != nil {
+	if err = models.GetDB().Create(&newFootballer).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -29,8 +29,44 @@ func RegisterNewFootballer(c *gin.Context) {
 	c.JSON(http.StatusOK, newFootballer)
 }
 
-// GetFootballers returns footballers matching provided criterias
-func GetFootballers(c *gin.Context) {
+// DeleteFootballer removes footballer from database (no soft delete here)
+func DeleteFootballer(c *gin.Context) {
+
+}
+
+// ListFootballers returns footballers matching provided criterias
+func ListFootballers(c *gin.Context) {
+	var (
+		footballer       models.Footballer
+		footballers      models.Footballers
+		footballersCount int
+		err              error
+	)
+	if err = c.ShouldBindQuery(&footballer); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// err = middlewares.Paginate(c, models.GetDB()).Find(&footballers, searchCondition).Error
+	footballers, err = footballer.Find()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+	footballersCount, err = footballer.Count()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"list":  footballers,
+		"count": footballersCount,
+	})
 }
 
 // GetFootballer gets a new footballer to database
@@ -42,7 +78,7 @@ func GetFootballer(c *gin.Context) {
 	}
 
 	footballer := &models.Footballer{}
-	err = models.GetDb().First(footballer, footballerID).Error
+	err = models.GetDB().First(footballer, footballerID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})

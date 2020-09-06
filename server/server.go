@@ -26,7 +26,6 @@ type Server struct {
 	DbConnHandler  *gorm.DB
 	Address        string
 	LogFileHandler *os.File
-	Endpoints      []endpoints.Endpoint
 }
 
 // Start initiates the API server

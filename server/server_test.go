@@ -10,7 +10,7 @@ import (
 )
 
 func TestInitializeServer(t *testing.T) {
-	db := tests.GetDbConnection()
+	db := tests.GetDBConnection()
 	serverAPI, err := Initialize(nil, db, ":8080", "/tmp/api.log")
 	assert.Nil(t, err)
 	assert.NotNil(t, serverAPI)
