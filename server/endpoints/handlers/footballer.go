@@ -26,11 +26,16 @@ func RegisterNewFootballer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, newFootballer)
+	c.JSON(http.StatusCreated, newFootballer)
 }
 
 // DeleteFootballer removes footballer from database (no soft delete here)
 func DeleteFootballer(c *gin.Context) {
+
+}
+
+// UpdateFootballer updates footballer saved informations
+func UpdateFootballer(c *gin.Context) {
 
 }
 
@@ -73,7 +78,7 @@ func ListFootballers(c *gin.Context) {
 func GetFootballer(c *gin.Context) {
 	footballerID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
@@ -83,7 +88,7 @@ func GetFootballer(c *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
 		} else {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		return
 	}

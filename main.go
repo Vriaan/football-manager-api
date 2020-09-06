@@ -18,6 +18,8 @@ const (
 	databaseDsnEnvVar = "DB_DSN"
 	// Environnement variable name containg API's config log
 	apiLogFileEnvVar = "API_LOG_FILE"
+	// Whether the API is is debug mode or release mod (debug mod will print errors reasons whereas production will print a genric reason)
+	apiMode = "API_MODE"
 	// Message for missing environnement variable
 	missingEnvVar = "Missing environnement variable `%s`"
 	// Database type (must be one of gorm supported database see https://gorm.io/docs/connecting_to_the_database.html).
@@ -26,7 +28,7 @@ const (
 )
 
 // List all environnement variables required for the API to run
-var environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar}
+var environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar, apiMode}
 
 // getEnvironnementSettings gets and checks all system environment variables are set up
 func getEnvironnementSettings() map[string]string {
@@ -37,6 +39,7 @@ func getEnvironnementSettings() map[string]string {
 		if value == "" {
 			panic(fmt.Sprintf(missingEnvVar, envVariableName))
 		}
+		fmt.Println(value)
 		environnementValues[envVariableName] = value
 	}
 

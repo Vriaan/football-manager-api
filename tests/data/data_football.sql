@@ -14,20 +14,20 @@ CREATE TABLE `footballers` (
 CREATE TABLE `teams` (
     `id` INT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-    `number1` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number2` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number3` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number4` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number5` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number6` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number7` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number8` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number9` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number10` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number11` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number12` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number13` INT UNSIGNED NOT NULL DEFAULT 0,
-    `number14` INT UNSIGNED NOT NULL DEFAULT 0,
+    `number1` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 1',
+    `number2` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 2',
+    `number3` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 3',
+    `number4` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 4',
+    `number5` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 5',
+    `number6` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 6',
+    `number7` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 7',
+    `number8` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 8',
+    `number9` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 9',
+    `number10` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 10',
+    `number11` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 11',
+    `number12` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 12 (substitute player)',
+    `number13` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 13 (substitute player)',
+    `number14` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Footballer ID being at football position number 14 (substitute player)',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT NULL,
     `deleted_at` DATETIME DEFAULT NULL
@@ -64,15 +64,15 @@ VALUES
 (14, 'Apu', 'Nahasapeemapetilon');
 
 INSERT INTO `teams` (`id`, `name`, `number1`, `number2`, `number3`, `number4`, `number5`, `number6`, `number7`, `number8`, `number9`, `number10`, `number11`, `number12`, `number13`,`number14`)
-VALUES,
-(1, 'Springfield Spirit'),
-(2, 'Quahog Demolisher'),
+VALUES
+(1, 'Springfield Spirit', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14),
+(2, 'Quahog Demolisher',  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28);
 
-INSERT INTO `managers` (`id`, `first_name`, `last_name`, `email`, `password`)
-VALUES,
 -- For this test I let the passwords there crytal clear
-(1, 'Marge', 'Simpson', 'marge.simpson@gmail.com', 'SpringfieldBestFamily'),
-(2, 'Peter', 'Griffin', 'peter.griffin@gmail.com', 'Peter Griffin'),
+INSERT INTO `managers` (`id`, `team_id`, `first_name`, `last_name`, `email`, `password`)
+VALUES
+(1, 1,  'Marge', 'Simpson', 'marge.simpson@gmail.com', 'ILoveMyFamily'),
+(2, 2, 'Peter', 'Griffin', 'peter.griffin@gmail.com', 'Peter Griffin');
 
 -- INSERT INTO `footballer_team` (`footballer_id`, `team_id`)
 -- VALUES,

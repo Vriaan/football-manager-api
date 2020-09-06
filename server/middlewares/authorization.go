@@ -18,7 +18,7 @@ const (
 	AuthorizationHeader = "Authorization"
 )
 
-// TODO: move this within a file, env setting or something else
+// TODO: move this within a config file, env setting or something else
 var jwtSecretKey = []byte("thisissecret")
 
 // CustomClaims reprensents our custom jwt claims
@@ -27,17 +27,17 @@ type CustomClaims struct {
 	UserID uint
 }
 
-// AttachAuthenticationToken generates and set header for authorization
-func AttachAuthenticationToken(c *gin.Context, userID uint) error {
-	authToken, err := createAuthToken(userID)
-	if err == nil {
-		c.Header(AuthorizationHeader, AuthorizationHeaderType+" "+authToken)
-	}
-	return err
-}
+// // AttachAuthenticationToken generates and set header for authorization
+// func AttachAuthenticationToken(c *gin.Context, userID uint) error {
+// 	authToken, err := createAuthToken(userID)
+// 	if err == nil {
+// 		c.Header(AuthorizationHeader, AuthorizationHeaderType+" "+authToken)
+// 	}
+// 	return err
+// }
 
-// createAuthToken generates a JWT token based on secret key
-func createAuthToken(userID uint) (jwtAuthToken string, err error) {
+// createAuthToken generates an authorization token
+func CreateAuthToken(userID uint) (authToken string, err error) {
 	expirationTime := time.Now().Add(authenticationDuration)
 
 	claims := &CustomClaims{
@@ -48,7 +48,7 @@ func createAuthToken(userID uint) (jwtAuthToken string, err error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtAuthToken, err = token.SignedString(jwtSecretKey)
+	authToken, err = token.SignedString(jwtSecretKey)
 	return
 }
 

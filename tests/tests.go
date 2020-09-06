@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -93,12 +94,9 @@ func GetDBConnection() *gorm.DB {
 	}
 
 	var err error
-	dbHandler, err = gorm.Open(
-		"mysql",
-		"root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local",
-	)
+	dbHandler, err = gorm.Open("mysql", os.Getenv("DB_DSN"))
 	if err != nil {
-		panic(err)
+		panic("Open test db handler error: " + err.Error())
 	}
 	models.SetDb(dbHandler)
 

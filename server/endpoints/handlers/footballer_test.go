@@ -17,32 +17,31 @@ import (
 func TestGetFootballerNotFound(t *testing.T) {
 	nonExistentFootballerID := "20000000"
 	getFootballerRoute := "/footballers/" + nonExistentFootballerID
-	contextParameters := tests.TestParams{
+	params := tests.TestParams{
 		PathParams: gin.Params{
 			gin.Param{Key: "id", Value: nonExistentFootballerID},
 		},
 	}
 	responseStatus, responseBody, err := tests.TestHTTPHandler("GET", getFootballerRoute,
-		contextParameters, GetFootballer)
+		params, GetFootballer)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	description := fmt.Sprintf("Status code %d from call %s", http.StatusNotFound, getFootballerRoute)
-	assert.Equal(t, http.StatusNotFound, responseStatus, description)
+	assert.Equal(t, http.StatusNotFound, responseStatus, string(responseBody))
 	assert.Equal(t, fmt.Sprintf("{\"error\":\"%s\"}", http.StatusText(http.StatusNotFound)), string(responseBody))
 }
 
 func TestGetFootballer(t *testing.T) {
 	footballerID := "1"
 	getFootballerRoute := "/footballers/" + footballerID
-	contextParameters := tests.TestParams{
+	params := tests.TestParams{
 		PathParams: gin.Params{
 			gin.Param{Key: "id", Value: footballerID},
 		},
 	}
 	responseStatus, responseBody, err := tests.TestHTTPHandler("GET", getFootballerRoute,
-		contextParameters, GetFootballer)
+		params, GetFootballer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,8 +54,7 @@ func TestGetFootballer(t *testing.T) {
 		t.Fatalf("Unmarshalling JSON could not match response to expected data type, response was: %s", responseBody)
 	}
 
-	description := fmt.Sprintf("Status code %d from call %s", http.StatusOK, getFootballerRoute)
-	assert.Equal(t, http.StatusOK, responseStatus, description)
+	assert.Equal(t, http.StatusOK, responseStatus, string(responseBody))
 
 	expectedFootballerData := models.Footballer{}
 	err = models.GetDB().First(&expectedFootballerData, footballerID).Error
@@ -70,29 +68,28 @@ func TestGetFootballer(t *testing.T) {
 
 func TestListFootballer(t *testing.T) {
 	listFootballersRoute := "/footballers"
-	contextParameters := tests.TestParams{}
-	responseStatus, responseBody, err := tests.TestHTTPHandler("GET", listFootballersRoute, contextParameters, ListFootballers)
+	params := tests.TestParams{}
+	responseStatus, responseBody, err := tests.TestHTTPHandler("GET", listFootballersRoute, params, ListFootballers)
 	if err != nil {
-		t.Fatal(err)
-	}
-
-	response := struct {
-		Count int64              `json:"count"`
-		List  models.Footballers `json:"list"`
-	}{}
-
-	if err := json.Unmarshal(responseBody, &response); err != nil {
 		t.Fatal(err)
 	}
 
 	expectedFootballers := models.Footballers{}
 	// total number of footballer matching
 	expectedCount := models.GetDB().Find(&expectedFootballers).RowsAffected
-	description := fmt.Sprintf("Status code %d from call %s", http.StatusOK, listFootballersRoute)
-	assert.Equal(t, http.StatusOK, responseStatus, description)
-	assert.Equal(t, expectedCount, response.Count)
 
-	assert.True(t, expectedFootballers == response.List)
+	expectedResponse := struct {
+		Count int64              `json:"count"`
+		List  models.Footballers `json:"list"`
+	}{Count: expectedCount, List: expectedFootballers}
+
+	expectedJSONResponse, err := json.Marshal(&expectedResponse)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusOK, responseStatus, string(responseBody))
+	assert.Equal(t, string(expectedJSONResponse), string(responseBody))
 }
 
 func TestRegisterNewFootballer(t *testing.T) {
@@ -115,10 +112,7 @@ func TestRegisterNewFootballer(t *testing.T) {
 		t.Fatalf("Unmarshalling JSON could not match response to expected data type, response was: %s", responseBody)
 	}
 
-	assert.Equal(t,
-		http.StatusOK, responseStatus,
-		fmt.Sprintf("Status code %d from call %s", http.StatusOK, createFootballerPath),
-	)
+	assert.Equal(t, http.StatusCreated, responseStatus, string(responseBody))
 	assert.Equal(t, bodyParams["FirstName"], newFootballer.FirstName)
 	assert.Equal(t, bodyParams["LastName"], newFootballer.LastName)
 }
@@ -127,14 +121,14 @@ func BenchmarkGetFootballer(b *testing.B) {
 	b.ReportAllocs()
 	footballerID := "1"
 	getFootballerPath := "/footballers/" + footballerID
-	contextParameters := tests.TestParams{
+	params := tests.TestParams{
 		PathParams: gin.Params{
 			gin.Param{Key: "id", Value: footballerID},
 		},
 	}
 	for n := 0; n < b.N; n++ {
 		_, _, err := tests.TestHTTPHandler("GET", getFootballerPath,
-			contextParameters, GetFootballer)
+			params, GetFootballer)
 		if err != nil {
 			b.Fatal(err)
 		}

@@ -51,6 +51,7 @@ func Initialize(providedAPIEngine *gin.Engine, dbConnHandler *gorm.DB, address, 
 	apiEngine := providedAPIEngine
 	if apiEngine == nil {
 		apiEngine = gin.New()
+		//TODO add another middlewares to log request parameters & response body
 		apiEngine.Use(
 			gin.LoggerWithFormatter(customLogFormat),
 			gin.Recovery(),

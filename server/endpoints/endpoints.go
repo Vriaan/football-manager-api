@@ -15,8 +15,10 @@ var (
 	// Those listed endpoint check for authorization before being accessed
 	needAuthorizationEndpoints = gin.RoutesInfo{
 		gin.RouteInfo{Method: http.MethodPost, Path: "/footballers", HandlerFunc: handlers.RegisterNewFootballer},
-		gin.RouteInfo{Method: http.MethodGet, Path: "/footballers/:id", HandlerFunc: handlers.GetFootballer},
 		gin.RouteInfo{Method: http.MethodGet, Path: "/footballers", HandlerFunc: handlers.ListFootballers},
+		gin.RouteInfo{Method: http.MethodGet, Path: "/footballers/:id", HandlerFunc: handlers.GetFootballer},
+		gin.RouteInfo{Method: http.MethodDelete, Path: "/footballers/:id", HandlerFunc: handlers.DeleteFootballer},
+		gin.RouteInfo{Method: http.MethodPut, Path: "/footballers/:id", HandlerFunc: handlers.UpdateFootballer},
 	}
 
 	// Those listed endpoints access is not protected by authorization

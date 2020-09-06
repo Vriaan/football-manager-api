@@ -5,25 +5,29 @@ networks:
     product_net:
 
 services:
-    api:
+    football-manager-api:
         image: golang:latest
         container_name: football-manager-api
         environment:
-            - DB_DSN="root:root@tcp(football-manager-db)/footballmanager?charset=utf8&parseTime=True&loc=Local"
-            - API_HOSTNAME="0.0.0.0:8081"
-            - API_LOG_FILE:"/var/log/footballmanagerapi/footballmanagerapi.log"
+            ## I conveniently sets the data base to the tests one so I reuse the data here.
+            # But I'd rather prefer to provide a DSN to an external DB (dev_db), that's why I'm not reusing
+            # football-manager-db-test service
+            - 'DB_DSN=root:root@tcp(football-manager-db)/footballmanager_test?charset=utf8&parseTime=True&loc=Local'
+            - 'API_HOSTNAME=0.0.0.0:8081'
+            - 'API_LOG_FILE=/var/log/footballmanagerapi/footballmanagerapi.log'
+            - 'API_MODE=debug'
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
         working_dir: ${CONTAINER_API_DIR}
         depends_on:
             - football-manager-db
         networks:
-            test_net:
+            product_net:
         ports:
             - 8081:8081
         expose:
             - 8081
-        command: go run api.go # go build -o ${CONTAINER_API_DIR}/bin/api api.go
+        command: go run main.go # go build -o ${CONTAINER_API_DIR}/bin/api api.go
 
     football-manager-db:
         image: mariadb:latest
@@ -46,8 +50,8 @@ services:
         image: golang:latest
         container_name: football-manager-api-test
         environment:
-            - DB_DSN="root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local"
-            - API_LOG_FILE:"/var/log/footballmanagerapi/footballmanagerapi.log"
+            - 'DB_DSN=root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local'
+            - 'API_LOG_FILE=var/log/footballmanagerapi/footballmanagerapi.log'
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
         working_dir: ${CONTAINER_API_DIR}
