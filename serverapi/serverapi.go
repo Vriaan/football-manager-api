@@ -58,19 +58,22 @@ func Initialize(
 	var logFileHandler *os.File
 	gin.DisableConsoleColor()
 
-	apiEngine := gin.New()
-	//TODO add another middlewares to log request parameters & response body
-	apiEngine.Use(
-		gin.LoggerWithFormatter(customLogFormat),
-		gin.Recovery(),
-	)
-
+	// TODO move to logrus ?
+	// TODO put logRotate ?
 	if logFileHandler, err = createLogFile(logFilePath); err != nil {
 		return
 	}
 	multiWriter := io.MultiWriter(logFileHandler, os.Stdout)
-	gin.DefaultWriter = multiWriter
-	gin.DefaultErrorWriter = multiWriter
+
+	apiEngine := gin.New()
+	//TODO add another middlewares to log request parameters & response body
+	apiEngine.Use(
+		gin.LoggerWithConfig(gin.LoggerConfig{
+			Formatter: customLogFormat,
+			Output:    multiWriter,
+		}),
+		gin.Recovery(),
+	)
 
 	// endpoints.Register(apiEngine)
 	serverAPI = &API{
@@ -106,7 +109,6 @@ func customLogFormat(param gin.LogFormatterParams) string {
 
 // initLogger creates every thing for custom logs (log filen, format)
 func createLogFile(logFilePath string) (logFileHandler *os.File, err error) {
-	logFilePath = "/var/log/api/api.log"
 	logPath := filepath.Dir(logFilePath)
 
 	if _, err = os.Stat(logPath); os.IsNotExist(err) {

@@ -39,7 +39,6 @@ func getEnvironnementSettings() map[string]string {
 		if value == "" {
 			panic(fmt.Sprintf(missingEnvVar, envVariableName))
 		}
-		fmt.Println(value)
 		environnementValues[envVariableName] = value
 	}
 
@@ -52,7 +51,7 @@ func main() {
 		err       error
 	)
 
-	// TODO: Implement config argument fallback on environment variables ?
+	// TODO: Implement config argument then fallback on environment variables ?
 	envSettings := getEnvironnementSettings()
 	if err = models.InitDatabaseConnection(sqlDatabase, envSettings[databaseDsnEnvVar]); err != nil {
 		panic("Initialize Database connection pool handler:" + err.Error())
