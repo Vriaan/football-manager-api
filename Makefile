@@ -34,7 +34,7 @@ start_docker_api:
 	docker-compose rm -fs $(DOCKER_DATABASE_SERVICE) $(DOCKER_API_SERVICE)
 	docker-compose up  -d --force-recreate $(DOCKER_DATABASE_SERVICE)
 	sleep 5
-	docker-compose up --no-recreate $(DOCKER_API_SERVICE)
+	-docker-compose run --rm -w $(CONTAINER_API_DIR) $(DOCKER_API_SERVICE) make exec
 
 test:
 	sleep 2
@@ -48,6 +48,9 @@ benchmark:
 
 build:
 	go build -o $(API_EXECUTABLE_NAME) $(API_MAIN_FILE)
+
+exec: build
+	$(API_EXECUTABLE_NAME)
 
 clean_docker:
 	docker-compose rm -fs
