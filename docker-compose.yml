@@ -15,7 +15,7 @@ services:
             ## I conveniently sets the data base to the tests one so I reuse the data here.
             # But I'd rather prefer to provide a DSN to an external DB (dev_db), that's why I'm not reusing
             # football-manager-db-test service
-            - 'DB_DSN=root:root@tcp(football-manager-db)/footballmanager_test?charset=utf8&parseTime=True&loc=Local'
+            - "DB_DSN=root:${MYSQL_ROOT_PASSWORD}@tcp(football-manager-db)/footballmanager_test?charset=utf8&parseTime=True&loc=Local"
             - 'API_HOSTNAME=0.0.0.0:8081'
             - 'API_LOG_FILE=/var/log/footballmanagerapi/footballmanagerapi.log'
             # GIN API integrates env variable for mode.
@@ -23,7 +23,7 @@ services:
             # Release will not display error reasons whereas debug/test mode will
             - 'GIN_MODE=release'
             # Authorization passphrase to encrypt/decrypt authorization tokens. hard coded here but must not be in git repo
-            - 'AUTH_SECRET=thisissecret'
+            - "AUTH_SECRET=${AUTH_SECRET}"
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
         working_dir: ${CONTAINER_API_DIR}
@@ -44,9 +44,9 @@ services:
         volumes:
             - ${TEST_DATA_DIR}:/docker-entrypoint-initdb.d/
         environment:
-            - MYSQL_ALLOW_EMPTY_PASSWORD=NO
-            - MYSQL_DATABASE=footballmanager
-            - MYSQL_ROOT_PASSWORD=root
+            - "MYSQL_ALLOW_EMPTY_PASSWORD=NO"
+            - "MYSQL_DATABASE=footballmanager"
+            - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
         networks:
             product_net:
                 ipv4_address: 192.168.0.6
@@ -59,10 +59,10 @@ services:
         image: golang:latest
         container_name: football-manager-api-test
         environment:
-            - 'DB_DSN=root:root@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local'
+            - "DB_DSN=root:${MYSQL_ROOT_PASSWORD}@tcp(football-manager-db-test)/footballmanager_test?charset=utf8&parseTime=True&loc=Local"
             - 'API_LOG_FILE=var/log/footballmanagerapi/footballmanagerapi.log'
             # Authorization passphrase to encrypt/decrypt authorization tokens
-            - 'AUTH_SECRET=thisissecret'
+            - "AUTH_SECRET=${AUTH_SECRET}"
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
         working_dir: ${CONTAINER_API_DIR}
@@ -78,9 +78,9 @@ services:
         volumes:
             - ${TEST_DATA_DIR}:/docker-entrypoint-initdb.d/
         environment:
-            - MYSQL_ALLOW_EMPTY_PASSWORD=NO
-            - MYSQL_DATABASE=footballmanager_test
-            - MYSQL_ROOT_PASSWORD=root
+            - 'MYSQL_ALLOW_EMPTY_PASSWORD=NO'
+            - 'MYSQL_DATABASE=footballmanager_test'
+            - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
         networks:
             test_net:
         ports:
