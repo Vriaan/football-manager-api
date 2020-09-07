@@ -10,7 +10,7 @@ import (
 
 func TestPingRoute(t *testing.T) {
 	urlPing := "/ping"
-	responseStatus, responseBody, err := test.CallAction("GET", urlPing, test.Params{}, Ping)
+	responseStatus, responseBody, err := test.CallAction("GET", urlPing, test.Params{}, Ping, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func BenchmarkPing(b *testing.B) {
 	urlPing := "/ping"
 
 	for n := 0; n < b.N; n++ {
-		_, _, err := test.CallAction("GET", urlPing, test.Params{}, Ping)
+		_, _, err := test.CallAction("GET", urlPing, test.Params{}, Ping, "")
 		if err != nil {
 			b.Fatal(err)
 		}

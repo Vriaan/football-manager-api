@@ -1,14 +1,12 @@
 package serverapi
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 
 	"github/vriaan/footballmanagerapi/endpoints"
 )
@@ -22,9 +20,7 @@ const (
 
 // API represents the project API server build atop gin engine framework
 type API struct {
-	Engine *gin.Engine
-	// DbConnHandler handles a pool of database connections
-	DbConnHandler  *gorm.DB
+	Engine         *gin.Engine
 	Address        string
 	LogFileHandler *os.File
 }
@@ -36,7 +32,6 @@ func (a *API) Start() {
 
 // Close cleanly closes the API server that need to be shutdown
 func (a *API) Close() {
-	a.DbConnHandler.Close()
 	if a.LogFileHandler != nil {
 		a.LogFileHandler.Close()
 	}
@@ -58,19 +53,11 @@ func (a *API) RegisterEndpoints(endpointsToRegister *endpoints.Endpoints) {
 // Initialize creates a new API server fully setup
 func Initialize(
 	apiEndpoints *endpoints.Endpoints,
-	dbConnHandler *gorm.DB,
 	address, logFilePath string,
 ) (serverAPI *API, err error) {
 	var logFileHandler *os.File
 	gin.DisableConsoleColor()
 
-	if dbConnHandler == nil {
-		err = errors.New("Nil database connection provided")
-		return
-	}
-
-	// it is possible to passdown an already configurated apiEngine (can be useful for test purpose),
-	// but if none provided, we create one
 	apiEngine := gin.New()
 	//TODO add another middlewares to log request parameters & response body
 	apiEngine.Use(
@@ -88,7 +75,6 @@ func Initialize(
 	// endpoints.Register(apiEngine)
 	serverAPI = &API{
 		Engine:         apiEngine,
-		DbConnHandler:  dbConnHandler,
 		Address:        address,
 		LogFileHandler: logFileHandler,
 	}

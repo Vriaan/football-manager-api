@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
 	"github/vriaan/footballmanagerapi/endpoints"
@@ -49,22 +48,20 @@ func getEnvironnementSettings() map[string]string {
 
 func main() {
 	var (
-		apiServer     *serverapi.API
-		dbConnHandler *gorm.DB
-		err           error
+		apiServer *serverapi.API
+		err       error
 	)
 
 	// TODO: Implement config argument fallback on environment variables ?
 	envSettings := getEnvironnementSettings()
-	if dbConnHandler, err = gorm.Open(sqlDatabase, envSettings[databaseDsnEnvVar]); err != nil {
+	if err = models.InitDatabaseConnection(sqlDatabase, envSettings[databaseDsnEnvVar]); err != nil {
 		panic("Initialize Database connection pool handler:" + err.Error())
 	}
-	models.SetDb(dbConnHandler)
+	defer models.GetDB().Close()
 
 	endpointList := endpoints.Get()
 	apiServer, err = serverapi.Initialize(
 		&endpointList,
-		dbConnHandler,
 		envSettings[apiAddressEnvVar],
 		envSettings[apiLogFileEnvVar],
 	)

@@ -2,7 +2,6 @@ package actions
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -24,13 +23,38 @@ func TestGetFootballerNotFound(t *testing.T) {
 		},
 	}
 	responseStatus, responseBody, err := test.CallAction("GET", getFootballerRoute,
-		params, GetFootballer)
+		params, GetFootballer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	assert.Equal(t, http.StatusNotFound, responseStatus, string(responseBody))
-	assert.Equal(t, fmt.Sprintf("{\"error\":\"%s\"}", http.StatusText(http.StatusNotFound)), string(responseBody))
+	assert.Equal(t, test.ResponseErrorByStatus(http.StatusNotFound), string(responseBody))
+}
+
+func TestGetFootballerPathError(t *testing.T) {
+	notAValidFootballerID := "NotANumber"
+	getFootballerRoute := "/footballers/" + notAValidFootballerID
+	params := test.Params{
+		PathParams: gin.Params{
+			gin.Param{Key: "id", Value: notAValidFootballerID},
+		},
+	}
+	responseStatus, responseBody, err := test.CallAction("GET", getFootballerRoute, params, GetFootballer, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusBadRequest, responseStatus, string(responseBody))
+	expectedError := "strconv.ParseUint: parsing \\\"" + notAValidFootballerID + "\\\": invalid syntax"
+	assert.Equal(t, test.ResponseError(expectedError), string(responseBody))
+
+	responseStatus, responseBody, err = test.CallAction("GET", getFootballerRoute, params, GetFootballer, gin.ReleaseMode)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, http.StatusBadRequest, responseStatus, string(responseBody))
+	assert.Equal(t, test.ResponseErrorByStatus(http.StatusBadRequest), string(responseBody))
 }
 
 func TestGetFootballer(t *testing.T) {
@@ -41,8 +65,7 @@ func TestGetFootballer(t *testing.T) {
 			gin.Param{Key: "id", Value: footballerID},
 		},
 	}
-	responseStatus, responseBody, err := test.CallAction("GET", getFootballerRoute,
-		params, GetFootballer)
+	responseStatus, responseBody, err := test.CallAction("GET", getFootballerRoute, params, GetFootballer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +93,7 @@ func TestGetFootballer(t *testing.T) {
 func TestListFootballer(t *testing.T) {
 	listFootballersRoute := "/footballers"
 	params := test.Params{}
-	responseStatus, responseBody, err := test.CallAction("GET", listFootballersRoute, params, ListFootballers)
+	responseStatus, responseBody, err := test.CallAction("GET", listFootballersRoute, params, ListFootballers, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +123,7 @@ func TestRegisterNewFootballer(t *testing.T) {
 	bodyParams["FirstName"] = "Blade"
 	bodyParams["LastName"] = "Runner"
 	contextParams := test.Params{BodyParams: bodyParams}
-	responseStatus, responseBody, err := test.CallAction("POST", createFootballerPath, contextParams, RegisterNewFootballer)
+	responseStatus, responseBody, err := test.CallAction("POST", createFootballerPath, contextParams, RegisterNewFootballer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +154,7 @@ func TestDeleteFootballer(t *testing.T) {
 			gin.Param{Key: "id", Value: toDeleteFootballerID},
 		},
 	}
-	responseStatus, responseBody, err := test.CallAction("DELETE", deleteFootballerPath, params, DeleteFootballer)
+	responseStatus, responseBody, err := test.CallAction("DELETE", deleteFootballerPath, params, DeleteFootballer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +182,7 @@ func TestUpdateFootballer(t *testing.T) {
 			gin.Param{Key: "LastName", Value: "Updated"},
 		},
 	}
-	responseStatus, responseBody, err := test.CallAction("PUT", updateFootballerPath, params, UpdateFootballer)
+	responseStatus, responseBody, err := test.CallAction("PUT", updateFootballerPath, params, UpdateFootballer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,8 +212,7 @@ func BenchmarkGetFootballer(b *testing.B) {
 		},
 	}
 	for n := 0; n < b.N; n++ {
-		_, _, err := test.CallAction("GET", getFootballerPath,
-			params, GetFootballer)
+		_, _, err := test.CallAction("GET", getFootballerPath, params, GetFootballer, "")
 		if err != nil {
 			b.Fatal(err)
 		}

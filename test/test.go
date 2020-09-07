@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	// Initialize MySQL driver for tests
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -18,8 +18,13 @@ import (
 	"github/vriaan/footballmanagerapi/models"
 )
 
-// TODO Replace by a mock SQL
-var dbHandler *gorm.DB
+// TODO Replace by a mock SQL (?)
+func init() {
+	err := models.InitDatabaseConnection("mysql", os.Getenv("DB_DSN"))
+	if err != nil {
+		panic("Open test db handler error: " + err.Error())
+	}
+}
 
 // Params is a convenient structure to pass parameters for tests endpoint
 type Params struct {
@@ -33,12 +38,16 @@ func CallAction(
 	method, urlEndpoint string,
 	params Params,
 	apiHandler gin.HandlerFunc,
+	ginMode string,
 ) (responseStatus int, responseBody []byte, err error) {
-	GetDBConnection()
 	recorder := httptest.NewRecorder()
 	handler := func(writer http.ResponseWriter, request *http.Request) {
+		if ginMode != "" {
+			gin.SetMode(ginMode)
+		} else {
+			gin.SetMode(gin.TestMode)
+		}
 
-		gin.SetMode(gin.TestMode)
 		context, _ := gin.CreateTestContext(writer)
 		context.Request = request
 		context.Params = append(params.PathParams, params.QueryParams...)
@@ -88,18 +97,12 @@ func dataToBufferizedJSON(data interface{}) (dataBuffized io.Reader, err error) 
 	return
 }
 
-// GetDBConnection instanciates a database connection for test within a singleton (TODO: Use a SQL Mock ?)
-func GetDBConnection() *gorm.DB {
-	if dbHandler != nil {
-		return dbHandler
-	}
+// ErrorByStatus formats the error message to the API error message format and set it to http status relative content
+func ResponseErrorByStatus(httpStatus int) string {
+	return fmt.Sprintf("{\"error\":\"%s\"}", http.StatusText(httpStatus))
+}
 
-	var err error
-	dbHandler, err = gorm.Open("mysql", os.Getenv("DB_DSN"))
-	if err != nil {
-		panic("Open test db handler error: " + err.Error())
-	}
-	models.SetDb(dbHandler)
-
-	return dbHandler
+// ResponseError formats the error message provided to the API error format
+func ResponseError(error string) string {
+	return fmt.Sprintf("{\"error\":\"%s\"}", error)
 }

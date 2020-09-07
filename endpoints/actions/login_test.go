@@ -11,6 +11,23 @@ import (
 	"github/vriaan/footballmanagerapi/test"
 )
 
+func TestLoginForbidden(t *testing.T) {
+	loginRoute := "/login"
+	params := test.Params{
+		BodyParams: map[string]interface{}{
+			"Email":    "idonotexist@gmail.com",
+			"Password": "thisissowrong",
+		},
+	}
+	responseStatus, responseBody, err := test.CallAction("POST", loginRoute, params, Login, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, http.StatusForbidden, responseStatus, string(responseBody))
+	assert.Equal(t, test.ResponseErrorByStatus(http.StatusForbidden), string(responseBody))
+}
+
 func TestLogin(t *testing.T) {
 	manager := models.Manager{}
 	errorDB := models.GetDB().First(&manager).Error
@@ -24,8 +41,7 @@ func TestLogin(t *testing.T) {
 			"Password": manager.Password,
 		},
 	}
-	responseStatus, responseBody, err := test.CallAction("POST", loginRoute,
-		params, Login)
+	responseStatus, responseBody, err := test.CallAction("POST", loginRoute, params, Login, "")
 	if err != nil {
 		t.Fatal(err)
 	}
