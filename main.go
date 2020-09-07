@@ -5,8 +5,10 @@ import (
 	"os"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/spf13/pflag"
 
 	"github/vriaan/footballmanagerapi/endpoints"
+	"github/vriaan/footballmanagerapi/middlewares"
 	"github/vriaan/footballmanagerapi/models"
 	"github/vriaan/footballmanagerapi/serverapi"
 )
@@ -28,7 +30,18 @@ const (
 )
 
 // List all environnement variables required for the API to run
-var environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar}
+var (
+	environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar, apiAuthorizationSecretKey}
+	Usage                  = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
+		fmt.Fprint(os.Stderr, "To run following environment variables must be set:\n")
+		for _, envVar := range environnementVariables {
+			fmt.Fprintf(os.Stderr, " > %s\n", envVar)
+		}
+
+		pflag.PrintDefaults()
+	}
+)
 
 // getEnvironnementSettings gets and checks all system environment variables are set up
 func getEnvironnementSettings() map[string]string {
@@ -50,13 +63,16 @@ func main() {
 		apiServer *serverapi.API
 		err       error
 	)
+	pflag.Usage = Usage
+	pflag.Parse()
 
-	// TODO: Implement config argument then fallback on environment variables ?
 	envSettings := getEnvironnementSettings()
 	if err = models.InitDatabaseConnection(sqlDatabase, envSettings[databaseDsnEnvVar]); err != nil {
 		panic("Initialize Database connection pool handler:" + err.Error())
 	}
 	defer models.GetDB().Close()
+
+	middlewares.SetAuthorizationPassphrase(envSettings[apiAuthorizationSecretKey])
 
 	endpointList := endpoints.Get()
 	apiServer, err = serverapi.Initialize(

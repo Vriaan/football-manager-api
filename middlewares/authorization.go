@@ -18,8 +18,13 @@ const (
 	AuthorizationHeader = "Authorization"
 )
 
-// TODO: move this within a config file, env setting or something else
-var jwtSecretKey = []byte("thisissecret")
+// JWT passphrase
+var jwtPassphrase []byte
+
+// SetAuthorizationPassphrase set the passphrase to encrypt/decrypt tokens for JWT
+func SetAuthorizationPassphrase(passphrase string) {
+	jwtPassphrase = []byte(passphrase)
+}
 
 // CustomClaims reprensents our custom jwt claims
 type CustomClaims struct {
@@ -39,7 +44,7 @@ func CreateAuthToken(userID uint) (authToken string, err error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	authToken, err = token.SignedString(jwtSecretKey)
+	authToken, err = token.SignedString(jwtPassphrase)
 	return
 }
 
@@ -50,7 +55,7 @@ func Authorization(c *gin.Context) {
 
 	claims := &CustomClaims{}
 	token, err := jwt.ParseWithClaims(authToken, claims, func(tkn *jwt.Token) (interface{}, error) {
-		return jwtSecretKey, nil
+		return jwtPassphrase, nil
 	})
 
 	// Authorization granted
