@@ -20,16 +20,16 @@ func Login(c *gin.Context) {
 	)
 
 	if err = c.ShouldBindJSON(&managerSearch); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	err = models.GetDB().Where(&managerSearch).First(&foundManager).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusForbidden, gin.H{"error": http.StatusText(http.StatusForbidden)})
+			abortStatus(c, http.StatusForbidden)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			abortError(c, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -38,7 +38,7 @@ func Login(c *gin.Context) {
 	// err = middlewares.AttachAuthenticationToken(c, manager.ID)
 	authorizationToken, err = middlewares.CreateAuthToken(foundManager.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		abortError(c, http.StatusInternalServerError, err)
 		return
 	}
 

@@ -19,8 +19,6 @@ const (
 	databaseDsnEnvVar = "DB_DSN"
 	// Environnement variable name containg API's config log
 	apiLogFileEnvVar = "API_LOG_FILE"
-	// Environnement variable name for whether the API is is debug mode or release mod (debug mod will print errors reasons whereas production will print a genric reason)
-	apiMode = "API_MODE"
 	// Environnement variable name for authorization tokens to be encrypted/decrypted
 	apiAuthorizationSecretKey = "AUTH_SECRET"
 	// Message for missing environnement variable
@@ -31,7 +29,7 @@ const (
 )
 
 // List all environnement variables required for the API to run
-var environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar, apiMode}
+var environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar}
 
 // getEnvironnementSettings gets and checks all system environment variables are set up
 func getEnvironnementSettings() map[string]string {

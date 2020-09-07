@@ -17,12 +17,12 @@ func RegisterNewFootballer(c *gin.Context) {
 	var newFootballer models.Footballer
 
 	if err = c.ShouldBindJSON(&newFootballer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if err = models.GetDB().Create(&newFootballer).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		abortError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -33,7 +33,7 @@ func RegisterNewFootballer(c *gin.Context) {
 func DeleteFootballer(c *gin.Context) {
 	footballerID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -41,9 +41,9 @@ func DeleteFootballer(c *gin.Context) {
 	err = models.GetDB().Delete(&deletedFootballer, footballerID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+			abortStatus(c, http.StatusNotFound)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			abortError(c, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -55,13 +55,13 @@ func DeleteFootballer(c *gin.Context) {
 func UpdateFootballer(c *gin.Context) {
 	footballerID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var footballerFieldToUpdate models.Footballer
 	if err = c.ShouldBindJSON(&footballerFieldToUpdate); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -70,9 +70,9 @@ func UpdateFootballer(c *gin.Context) {
 	updatedFootballer, err = (&models.Footballer{}).UpdateOne(uint(footballerID), footballerFieldToUpdate)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+			abortStatus(c, http.StatusNotFound)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			abortError(c, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -89,22 +89,22 @@ func ListFootballers(c *gin.Context) {
 		err                  error
 	)
 	if err = c.ShouldBindQuery(&FootballerConditions); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 	limit, offset := paginate(c)
 	footballers, err = FootballerConditions.Find(limit, offset)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+			abortStatus(c, http.StatusNotFound)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			abortError(c, http.StatusInternalServerError, err)
 		}
 		return
 	}
 	footballersCount, err = FootballerConditions.Count()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		abortError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -118,7 +118,7 @@ func ListFootballers(c *gin.Context) {
 func GetFootballer(c *gin.Context) {
 	footballerID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -126,9 +126,9 @@ func GetFootballer(c *gin.Context) {
 	err = models.GetDB().First(footballer, footballerID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": http.StatusText(http.StatusNotFound)})
+			abortStatus(c, http.StatusNotFound)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			abortError(c, http.StatusInternalServerError, err)
 		}
 		return
 	}

@@ -29,25 +29,23 @@ func paginate(c *gin.Context) (limit, offset string) {
 	return
 }
 
-func writeStatusError(c *gin.Context, httpStatusCode int) {
+// abortStatus aborts the current context and sets response status with and its relative content
+func abortStatus(c *gin.Context, httpStatusCode int) {
 	c.AbortWithStatusJSON(
 		httpStatusCode,
-		gin.H{"error": http.StatusText(httpStatusCode)},
+		gin.H{errorResponseKey: http.StatusText(httpStatusCode)},
 	)
 }
 
-// SetErrorFromStatus returns a pre formatted error message based on current API mode
-func SetErrorFromStatus(httpStatusCode int, err error) gin.H {
-	var errorMessage string
-	switch gin.Mode() {
-	case gin.DebugMode:
-		fallthrough
-	case gin.TestMode:
-		errorMessage = err.Error()
-	case gin.ReleaseMode:
-		fallthrough
-	default:
-		errorMessage = http.StatusText(httpStatusCode)
+// abortError aborts with generic http status content or the error reason depending on api mode
+func abortError(c *gin.Context, httpStatusCode int, err error) {
+	apiMode := gin.Mode()
+	if apiMode == gin.DebugMode || apiMode == gin.TestMode {
+		c.AbortWithStatusJSON(
+			httpStatusCode,
+			gin.H{errorResponseKey: err.Error()},
+		)
+	} else {
+		abortStatus(c, httpStatusCode)
 	}
-	return gin.H{"error": errorMessage}
 }

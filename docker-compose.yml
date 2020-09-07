@@ -15,7 +15,10 @@ services:
             - 'DB_DSN=root:root@tcp(football-manager-db)/footballmanager_test?charset=utf8&parseTime=True&loc=Local'
             - 'API_HOSTNAME=0.0.0.0:8081'
             - 'API_LOG_FILE=/var/log/footballmanagerapi/footballmanagerapi.log'
-            - 'API_MODE=debug'
+            # GIN API integrates env variable for mode.
+            # Values: Release/debug/test.
+            # Release will not display error reasons whereas debug/test mode will
+            - 'GIN_MODE=release'
             - 'AUTH_SECRET=thisissecret'
         volumes:
             - ${API_DIR}:${CONTAINER_API_DIR}
