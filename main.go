@@ -34,12 +34,12 @@ var (
 	environnementVariables = []string{apiAddressEnvVar, databaseDsnEnvVar, apiLogFileEnvVar, apiAuthorizationSecretKey}
 	Usage                  = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-		fmt.Fprint(os.Stderr, "To run following environment variables must be set:\n")
+		fmt.Fprint(os.Stderr, "To run following environment variables must be set and not empty:\n")
 		for _, envVar := range environnementVariables {
-			fmt.Fprintf(os.Stderr, " > %s\n", envVar)
+			fmt.Fprintf(os.Stderr, "\t> %s\n", envVar)
 		}
-
-		pflag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "You can also set up the API verbose mode using GIN_MODE (please, refer to godoc gin for how to use)\n")
+		fmt.Fprintf(os.Stderr, "\n")
 	}
 )
 

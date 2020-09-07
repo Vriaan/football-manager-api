@@ -10,6 +10,7 @@ The project uses some known golang packages (you can easily find more here https
 * [gin] - The API framework used to power the project
 * [gorm] - The ORM to efficiently query Databases
 * [jwt-go] - The Authorization system is build atop JWT (JSON Web Tokens)
+* [pflag] - To Parse command arguments
 * [testify] - To efficiently write tests
 
 
@@ -57,6 +58,12 @@ The API is running using configuration from environment variables:
 * DB_DSN - Database DSN for connection (mandatory)
 * API_LOG_FILE - The log file the api is writing to is specified in this file (mandatory)
 * AUTH_SECRET - JWT secret passphrase to encrypt/decrypt authorization tokens
+
+
+You can print the full list using:
+```sh
+$ apibinary --help
+```
 
 #### Testing & Benchmarking
 For now the API tests depends on a database container (mock could come later).
