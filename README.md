@@ -1,16 +1,16 @@
 # API
-API_HOSTNAME=":8082" API_LOG_FILE="/var/log/api/api.log" DB_DSN="root:root@tcp(127.0.0.1:8088)/game?charset=utf8&parseTime=True&loc=Local" go run api.go
-Welcome on football team API that indeed interfaces between your data and your client to let you manage your football team
+
+Welcome on football Manager API !
+The project is the basis ground API written in Go to let you manage your football team and is far from over. It will continue to evolve.
 
 ### Tech
 
-The project uses some known golang packages (you easily find more here https://github.com/avelino/awesome-go):
+The project uses some known golang packages (you can easily find more here https://github.com/avelino/awesome-go):
 
-* [Viper] - Manages configuration for your project
-* [pflag] - Manages for you the command tools argument parsing
 * [gin] - The API framework used to power the project
 * [gorm] - The ORM to efficiently query Databases
-* [testify] - To efficiently write tests & mocks
+* [jwt-go] - The Authorization system is build atop JWT (JSON Web Tokens)
+* [testify] - To efficiently write tests
 
 
 ### How to use
@@ -18,77 +18,76 @@ Since go 1.11 we have a pretty management system integrated to go commands tool:
 The go.mod / go.sum files handles already all the dependencies used in the project so everything should be imported for you at build (except if those library needs you to install system packages)
 
 ### Architecture
+* bin/ - binary file will be build in there
+* endpoints/ - Contains endpoints declarations & code
+    * actions - Contains all endpoint actions code
+* middlewares/ - Code in between the API & the endpoint action (middlewares)
+* migrations/ - Databases migration files will be placed here
+* models/ - Data models build atop gorm
+* serverapi/ - The API server build atop gin code is here
+* test/ - Contains test data and a go package containing code to write tests more easily
+    * data - Contains test data (for now as .sql file(s))
+* vendor/ - Dependancies are vendored (because I don't want future package changes to break something unexpectedly).
+* docker-compose.yml - Classic file to manage containers with docker-compose (more details in docker section)
+* Makefile - Makes life easier when it comes about testing or doing manual operations
+* go.mod/go.sum - Go dependancies management system files
+* main.go - If you need to start reading code, start with this file
+* Readme.md - Guess what you are reading
 
-#### Building for source
-For production release:
+### Starting the API within a container
+So far the API does not need to run in background. A dedicated configuration will have to done be done in this case.
+
+To set up the API within docker:
 ```sh
-$ gulp build --prod
-```
-Generating pre-built zip archives for distribution:
-```sh
-$ gulp build dist --prod
-```
-### Docker
-Dillinger is very easy to install and deploy in a Docker container.
-
-By default, the Docker will expose port 8080, so change this within the Dockerfile if necessary. When ready, simply use the Dockerfile to build the image.
-
-```sh
-cd dillinger
-docker build -t joemccann/dillinger:${package.json.version} .
-```
-This will create the dillinger image and pull in the necessary dependencies. Be sure to swap out `${package.json.version}` with the actual version of Dillinger.
-
-Once done, run the Docker image and map the port to whatever you wish on your host. In this example, we simply map port 8000 of the host to port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
-
-```sh
-docker run -d -p 8000:8080 --restart="always" <youruser>/dillinger:${package.json.version}
+$ make start_docker_api
 ```
 
-Verify the deployment by navigating to your server address in your preferred browser.
-
+(With the current docker-compose config) You can call the API using
+* From Outside the container network
 ```sh
-127.0.0.1:8000
+$ curl -i "192.168.0.4:8081/ping"
 ```
+from Inside the API container network
+```sh
+$ curl -i "0.0.0.0:8081/ping"
+```
+The API is running using configuration from environment variables:
+* GIN_MODE - The API mode to show more or less informations about errors & what the API does (optional)
+* API_HOSTNAME - the API host (mandatory)
+* DB_DSN - Database DSN for connection (mandatory)
+* API_LOG_FILE - The log file the api is writing to is specified in this file (mandatory)
+* AUTH_SECRET - JWT secret passphrase to encrypt/decrypt authorization tokens
 
-#### Kubernetes + Google Cloud
+#### Testing & Benchmarking
+For now the API tests depends on a database container (mock could come later).
+So the tests are run inside a container.
+You can run the tests using following command
+```sh
+$ make run_docker_test
+```
+similary benchmarks can be run using
+```sh
+$ make run_docker_benchmark
+```
+### Docker-compose configurations
+You will find 4 containers working by pair in distinct networks. The pair are not meant to interact.
 
-See [KUBERNETES.md](https://github.com/joemccann/dillinger/blob/master/KUBERNETES.md)
+* A pair API - Database used to run the API (because we might later supposed the API & databases containers will diverge from the tests pair version)
+* Another pair API - Database used only to run tests/benchmarks.
 
+The Makefile contains some targets to interact smoothly with the containers.
+Note: You may need to do a make clean from time to time (clean up some docker stuffs)
 
 ### Todos
 
- - Write MORE Tests
- - Add Night Mode
+ - Improve code coverage
+ - Use argument to setup the api (see github.com/spf13/pflag) to get configurations from a file/etc (see github.com/spf13/viper) then fallback on environment variables.
+ - Use github.com/sirupsen/logru as logger
+ - Write middlewares/decorators to log request parameters/response body
+ - Database test passwords should not be crystal clear (hash them at least)
+ - Tests could use a Datbase Mock
 
 License
 ----
 
 MIT
-
-
-**Free Software, Hell Yeah!**
-
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
-
-
-   [dill]: <https://github.com/joemccann/dillinger>
-   [git-repo-url]: <https://github.com/joemccann/dillinger.git>
-   [john gruber]: <http://daringfireball.net>
-   [df1]: <http://daringfireball.net/projects/markdown/>
-   [markdown-it]: <https://github.com/markdown-it/markdown-it>
-   [Ace Editor]: <http://ace.ajax.org>
-   [node.js]: <http://nodejs.org>
-   [Twitter Bootstrap]: <http://twitter.github.com/bootstrap/>
-   [jQuery]: <http://jquery.com>
-   [@tjholowaychuk]: <http://twitter.com/tjholowaychuk>
-   [express]: <http://expressjs.com>
-   [AngularJS]: <http://angularjs.org>
-   [Gulp]: <http://gulpjs.com>
-
-   [PlDb]: <https://github.com/joemccann/dillinger/tree/master/plugins/dropbox/README.md>
-   [PlGh]: <https://github.com/joemccann/dillinger/tree/master/plugins/github/README.md>
-   [PlGd]: <https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md>
-   [PlOd]: <https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md>
-   [PlMe]: <https://github.com/joemccann/dillinger/tree/master/plugins/medium/README.md>
-   [PlGa]: <https://github.com/RahulHP/dillinger/blob/master/plugins/googleanalytics/README.md>
