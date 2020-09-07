@@ -7,7 +7,7 @@ import (
 	"github/vriaan/footballmanagerapi/middlewares"
 )
 
-// Endpoints is a convenient type to means Endpoint slice
+// Endpoints is a convenient type for Endpoint slice
 type Endpoints []Endpoint
 
 // Endpoint represents an API endpoint

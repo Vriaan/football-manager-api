@@ -18,7 +18,7 @@ const (
 	apiLogFormat = "%s | From %s | Latency %s | resp body size %d | %d | %s %s %s\n"
 )
 
-// API represents the project API server build atop gin engine framework
+// API represents the project Restful API server build atop gin engine framework
 type API struct {
 	Engine         *gin.Engine
 	Address        string

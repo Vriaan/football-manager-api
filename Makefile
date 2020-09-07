@@ -1,21 +1,21 @@
 # API test service name within docker-compose.yml
-DOCKER_API_TEST_SERVICE := football-manager-api-test
+DOCKER_API_TEST_SERVICE ?= football-manager-api-test
 # API test service name within docker-compose.yml
-DOCKER_DATABASE_TEST_SERVICE := football-manager-db-test
+DOCKER_DATABASE_TEST_SERVICE ?= football-manager-db-test
 # API service name within docker-compose.yml
-DOCKER_API_SERVICE := football-manager-api
+DOCKER_API_SERVICE ?= football-manager-api
 # Database service name within docker-compose.yml
-DOCKER_DATABASE_SERVICE := football-manager-db
+DOCKER_DATABASE_SERVICE ?= football-manager-db
 
 # API directory within docker container (Todo: put just the binary file)
-CONTAINER_API_DIR := /usr/project/football-manager-api
+CONTAINER_API_DIR ?= /usr/project/football-manager-api
 
-API_DIR := .
+API_DIR ?= .
 
 # api executable absolute path
-API_EXECUTABLE_NAME := $(API_DIR)/bin/footballmanagerapi
+API_EXECUTABLE_NAME ?= $(API_DIR)/bin/footballmanagerapi
 # api entrypoint file
-API_MAIN_FILE := $(API_DIR)/main.go
+API_MAIN_FILE ?= $(API_DIR)/main.go
 
 .PHONY: test
 

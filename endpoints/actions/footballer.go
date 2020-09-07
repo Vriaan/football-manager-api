@@ -21,7 +21,7 @@ func RegisterNewFootballer(c *gin.Context) {
 		return
 	}
 
-	if err = models.GetDB().Create(&newFootballer).Error; err != nil {
+	if err = newFootballer.Create(); err != nil {
 		abortError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -37,8 +37,9 @@ func DeleteFootballer(c *gin.Context) {
 		return
 	}
 
-	deletedFootballer := &models.Footballer{}
-	err = models.GetDB().Delete(&deletedFootballer, footballerID).Error
+	footballerToDelete := models.Footballer{}
+	footballerToDelete.ID = uint(footballerID)
+	err = footballerToDelete.Delete()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			abortStatus(c, http.StatusNotFound)
@@ -65,7 +66,6 @@ func UpdateFootballer(c *gin.Context) {
 		return
 	}
 
-	// footballerFieldToUpdate.ID = 0
 	var updatedFootballer models.Footballer
 	updatedFootballer, err = (&models.Footballer{}).UpdateOne(uint(footballerID), footballerFieldToUpdate)
 	if err != nil {
@@ -93,7 +93,7 @@ func ListFootballers(c *gin.Context) {
 		return
 	}
 	limit, offset := paginate(c)
-	footballers, err = FootballerConditions.Find(limit, offset)
+	footballers, err = FootballerConditions.List(limit, offset)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			abortStatus(c, http.StatusNotFound)

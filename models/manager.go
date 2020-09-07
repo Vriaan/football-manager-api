@@ -13,3 +13,9 @@ type Manager struct {
 	Password  string
 	Email     string
 }
+
+// First retruns the first record maching condition on non empty field from m
+func (m *Manager) First() (foundManager Manager, err error) {
+	err = GetDB().Where(m).First(&foundManager).Error
+	return
+}

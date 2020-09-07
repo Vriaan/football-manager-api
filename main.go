@@ -38,8 +38,8 @@ var (
 		for _, envVar := range environnementVariables {
 			fmt.Fprintf(os.Stderr, "\t> %s\n", envVar)
 		}
-		fmt.Fprintf(os.Stderr, "You can also set up the API verbose mode using GIN_MODE (please, refer to godoc gin for how to use)\n")
-		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprint(os.Stderr, "You can also set up the API verbose mode using GIN_MODE (please, refer to godoc gin for how to use)\n")
+		fmt.Fprint(os.Stderr, "\n")
 	}
 )
 

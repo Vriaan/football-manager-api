@@ -14,17 +14,17 @@ import (
 // Login route checks user credentials and returns a validation token
 func Login(c *gin.Context) {
 	var (
-		managerSearch, foundManager models.Manager
-		authorizationToken          string
-		err                         error
+		searchedManager, foundManager models.Manager
+		authorizationToken            string
+		err                           error
 	)
 
-	if err = c.ShouldBindJSON(&managerSearch); err != nil {
+	if err = c.ShouldBindJSON(&searchedManager); err != nil {
 		abortError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = models.GetDB().Where(&managerSearch).First(&foundManager).Error
+	foundManager, err = searchedManager.First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			abortStatus(c, http.StatusForbidden)
