@@ -6,29 +6,30 @@ DOCKER_API_SERVICE := football-manager-api
 DOCKER_DATABASE_SERVICE := football-manager-db
 
 # API directory within docker container (Todo: put just the binary file)
-CONTAINER_API_DIR := /usr/project/api
+CONTAINER_API_DIR := /usr/project/football-manager-api
+
+API_DIR := .
 
 # api executable absolute path
-API_EXECUTABLE_NAME := $(CONTAINER_API_DIR)/bin/api
+API_EXECUTABLE_NAME := $(API_DIR)/bin/api
 # api entrypoint file
-API_MAIN_FILE := $(CONTAINER_API_DIR)/main.go
+API_MAIN_FILE := $(API_DIR)/main.go
+
+.PHONY: test
 
 run_docker_test:
 	@echo "RUNNING Tests within Docker container $(DOCKER_API_TEST_SERVICE)\n"
 	-docker-compose run --rm -w $(CONTAINER_API_DIR) $(DOCKER_API_TEST_SERVICE) make test
 	docker-compose rm -fs
-	docker container prune -f
 
 run_docker_benchmark:
 	@echo "RUNNING Benchmarks within Docker container $(DOCKER_API_TEST_SERVICE)\n"
 	-docker-compose run --rm -w $(CONTAINER_API_DIR) $(DOCKER_API_TEST_SERVICE) make benchmark
 	docker-compose rm -fs
-	docker container prune -f
 
 start_docker_api:
 	@echo "STARTING API environment\n"
 	docker-compose rm -fs
-	docker container prune -f
 	docker-compose up  -d --force-recreate $(DOCKER_DATABASE_SERVICE)
 	sleep 5
 	docker-compose up --no-recreate $(DOCKER_API_SERVICE)
@@ -36,7 +37,6 @@ start_docker_api:
 stop_docker_api:
 	@echo "STOPS API environment\n"
 	docker-compose down
-	docker container prune -f
 
 test:
 	sleep 2
@@ -51,8 +51,7 @@ benchmark:
 build:
 	go build -o $(API_EXECUTABLE_NAME) $(API_MAIN_FILE)
 
-# Clean golang cache & containers
-clean:
-	go clean -cache -testcache
+clean_docker:
 	docker-compose rm -fs
 	docker container prune -f
+	docker volume prune -f

@@ -7,8 +7,9 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
+	"github/vriaan/footballmanagerapi/endpoints"
 	"github/vriaan/footballmanagerapi/models"
-	"github/vriaan/footballmanagerapi/server"
+	"github/vriaan/footballmanagerapi/serverapi"
 )
 
 const (
@@ -50,7 +51,7 @@ func getEnvironnementSettings() map[string]string {
 
 func main() {
 	var (
-		apiServer     *server.Server
+		apiServer     *serverapi.API
 		dbConnHandler *gorm.DB
 		err           error
 	)
@@ -61,7 +62,14 @@ func main() {
 		panic("Initialize Database connection pool handler:" + err.Error())
 	}
 	models.SetDb(dbConnHandler)
-	apiServer, err = server.Initialize(nil, dbConnHandler, envSettings[apiAddressEnvVar], envSettings[apiLogFileEnvVar])
+
+	endpointList := endpoints.Get()
+	apiServer, err = serverapi.Initialize(
+		&endpointList,
+		dbConnHandler,
+		envSettings[apiAddressEnvVar],
+		envSettings[apiLogFileEnvVar],
+	)
 	if err != nil {
 		panic(err.Error())
 	}

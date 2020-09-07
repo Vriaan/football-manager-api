@@ -1,7 +1,0 @@
-# API hostname
-hostname: 0.0.0.0
-# API port
-port: 8080
-# Services interface configuration
-mysql:
-    dsn: "root:root@tcp(game-db)/game?charset=utf8&parseTime=True&loc=Local"

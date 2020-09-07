@@ -15,8 +15,15 @@ type Footballer struct {
 }
 
 // Find retrieves footballers record matching fields conditions setted up within f
-func (f *Footballer) Find() (footballers Footballers, err error) {
-	err = GetDB().Where(f).Find(&footballers).Error
+func (f *Footballer) Find(limit, offset string) (footballers Footballers, err error) {
+	query := GetDB().Where(f)
+	if limit == "" {
+		query.Limit(limit)
+	}
+	if offset == "" {
+		query.Offset(offset)
+	}
+	err = query.Find(&footballers).Error
 	return
 }
 
