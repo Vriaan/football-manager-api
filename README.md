@@ -16,7 +16,8 @@ The project uses some known golang packages (you can easily find more here https
 
 ### How to use
 Since go 1.11 we have a pretty management system integrated to go commands tool: go modules.
-The go.mod / go.sum files handles already all the dependencies used in the project so everything should be imported for you at build (except if those library needs you to install system packages)
+The go.mod / go.sum files handles already all the dependencies used in the project so everything should be imported for you at build (except if those libraries need you to install system packages).
+The project uses a vendor mostly to avoid downloading the depen over and over
 
 ### Architecture
 * bin/ - binary file will be build in there
@@ -28,15 +29,15 @@ The go.mod / go.sum files handles already all the dependencies used in the proje
 * serverapi/ - The API server build atop gin code is here
 * test/ - Contains test data and a go package containing code to write tests more easily
     * data - Contains test data (for now as .sql file(s))
-* vendor/ - Dependancies are vendored (because I don't want future package changes to break something unexpectedly).
+* vendor/ - Dependencies are vendored
 * docker-compose.yml - Classic file to manage containers with docker-compose (more details in docker section)
 * Makefile - Makes life easier when it comes about testing or doing manual operations
-* go.mod/go.sum - Go dependancies management system files
+* go.mod/go.sum - Go dependencies management system files
 * main.go - If you need to start reading code, start with this file
 * Readme.md - Guess what you are reading
 
 ### Starting the API within a container
-So far the API does not need to run in background. A dedicated configuration will have to done be done in this case.
+So far the API does not need to run in background. A dedicated configuration will have be done in this case.
 
 To set up the API within docker:
 ```sh
@@ -66,7 +67,7 @@ $ apibinary --help
 ```
 
 #### Testing & Benchmarking
-For now the API tests depends on a database container (mock could come later).
+For now the API tests depend on a database container (mock could come later).
 So the tests are run inside a container.
 You can run the tests using following command
 ```sh
