@@ -86,7 +86,7 @@ You will find 4 containers working by pair in distinct networks. The pair are no
 The Makefile contains some targets to interact smoothly with the containers.
 Note: You may need to do a make clean from time to time (clean up some docker stuffs)
 
-### Todos
+### Todo List
 
  - Improve code coverage
  - Use argument to setup the api (see github.com/spf13/pflag) to get configurations from a file/etc (see github.com/spf13/viper) then fallback on environment variables.
@@ -94,6 +94,8 @@ Note: You may need to do a make clean from time to time (clean up some docker st
  - Write middlewares/decorators to log request parameters/response body
  - Database test passwords should not be crystal clear (hash them at least)
  - Tests could use a Datbase Mock
+ - Finish to implements models and relationship
+ - Add swagger documentation
 
 License
 ----
